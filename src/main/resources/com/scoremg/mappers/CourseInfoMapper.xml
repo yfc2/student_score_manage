@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.scoremg.mappers.CourseInfoMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.scoremg.entity.po.CourseInfo">
+		<!--自增id-->
+		<id column="course_id" property="courseId"/>
+		<!--课程名称-->
+		<result column="course_name" property="courseName"/>
+		<!--教师id-->
+		<result column="teacher_id" property="teacherId"/>
+		<!--课程描述-->
+		<result column="description" property="description"/>
+		<!--开始时间-->
+		<result column="start_time" property="startTime"/>
+		<!--结束时间-->
+		<result column="end_time" property="endTime"/>
+		<!--上课班级-->
+		<result column="class_room" property="classRoom"/>
+		<!--上课方式-->
+		<result column="teach_method" property="teachMethod"/>
+		<!--最大上课人数-->
+		<result column="max_enrollment" property="maxEnrollment"/>
+		<!--考核方式-->
+		<result column="asses_method" property="assesMethod"/>
+	</resultMap>
+
+	<!--通用sql查询-->
+	<sql id="base_column_list">
+		course_id,course_name,teacher_id,description,start_time,end_time,class_room,teach_method,max_enrollment,asses_method
+	</sql>
+
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.courseId !=null">
+			and course_id=#{query.courseId}
+		</if>
+		<if test="query.courseName !=null and query.courseName!=''">
+			and course_name=#{query.courseName}
+		</if>
+		<if test="query.teacherId !=null and query.teacherId!=''">
+			and teacher_id=#{query.teacherId}
+		</if>
+		<if test="query.description !=null and query.description!=''">
+			and description=#{query.description}
+		</if>
+		<if test="query.startTime !=null">
+			and start_time=#{query.startTime}
+		</if>
+		<if test="query.endTime !=null">
+			and end_time=#{query.endTime}
+		</if>
+		<if test="query.classRoom !=null and query.classRoom!=''">
+			and class_room=#{query.classRoom}
+		</if>
+		<if test="query.teachMethod !=null">
+			and teach_method=#{query.teachMethod}
+		</if>
+		<if test="query.maxEnrollment !=null">
+			and max_enrollment=#{query.maxEnrollment}
+		</if>
+		<if test="query.assesMethod !=null and query.assesMethod!=''">
+			and asses_method=#{query.assesMethod}
+		</if>
+
+	</sql>
+
+	<!--扩展的查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.courseNameFuzzy !=null and query.courseNameFuzzy !=''">
+			 and course_name like concat('%',#{query.courseNameFuzzy},'%')
+		</if>
+		<if test="query.teacherIdFuzzy !=null and query.teacherIdFuzzy !=''">
+			 and teacher_id like concat('%',#{query.teacherIdFuzzy},'%')
+		</if>
+		<if test="query.descriptionFuzzy !=null and query.descriptionFuzzy !=''">
+			 and description like concat('%',#{query.descriptionFuzzy},'%')
+		</if>
+		<if test="query.startTimeStart !=null and query.startTimeStart !=''">
+			<![CDATA[ and start_time>=str_to_date(#{query.startTimeStart},'%Y-%m-%d') ]]>
+		</if>
+		<if test="query.startTimeEnd !=null and query.startTimeEnd !=''">
+			<![CDATA[ and start_time < date_sub(str_to_date(#{query.startTimeEnd},'%Y-%m-%d'),interval-1 day) ]]>
+		</if>
+		<if test="query.endTimeStart !=null and query.endTimeStart !=''">
+			<![CDATA[ and end_time>=str_to_date(#{query.endTimeStart},'%Y-%m-%d') ]]>
+		</if>
+		<if test="query.endTimeEnd !=null and query.endTimeEnd !=''">
+			<![CDATA[ and end_time < date_sub(str_to_date(#{query.endTimeEnd},'%Y-%m-%d'),interval-1 day) ]]>
+		</if>
+		<if test="query.classRoomFuzzy !=null and query.classRoomFuzzy !=''">
+			 and class_room like concat('%',#{query.classRoomFuzzy},'%')
+		</if>
+		<if test="query.assesMethodFuzzy !=null and query.assesMethodFuzzy !=''">
+			 and asses_method like concat('%',#{query.assesMethodFuzzy},'%')
+		</if>
+
+	</sql>
+
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM course_info
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+            order by ${query.orderBy}
+        </if>
+		<if test="query.simplePage!=null">
+            limit #{query.simplePage.start},#{query.simplePage.end}
+        </if>
+	</select>
+
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM course_info
+		<include refid="query_condition"/>
+	</select>
+
+	<!--插入 (匹配有值的字段)-->
+	<insert id="insert" parameterType="com.scoremg.entity.po.CourseInfo">
+		<selectKey keyProperty="bean.courseId" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID()
+        </selectKey>
+		INSERT INTO
+		course_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.courseId!=null">
+				course_id,
+			</if>
+			<if test="bean.courseName!=null">
+				course_name,
+			</if>
+			<if test="bean.teacherId!=null">
+				teacher_id,
+			</if>
+			<if test="bean.description!=null">
+				description,
+			</if>
+			<if test="bean.startTime!=null">
+				start_time,
+			</if>
+			<if test="bean.endTime!=null">
+				end_time,
+			</if>
+			<if test="bean.classRoom!=null">
+				class_room,
+			</if>
+			<if test="bean.teachMethod!=null">
+				teach_method,
+			</if>
+			<if test="bean.maxEnrollment!=null">
+				max_enrollment,
+			</if>
+			<if test="bean.assesMethod!=null">
+				asses_method,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.courseId!=null">
+				#{bean.courseId},
+			</if>
+			<if test="bean.courseName!=null">
+				#{bean.courseName},
+			</if>
+			<if test="bean.teacherId!=null">
+				#{bean.teacherId},
+			</if>
+			<if test="bean.description!=null">
+				#{bean.description},
+			</if>
+			<if test="bean.startTime!=null">
+				#{bean.startTime},
+			</if>
+			<if test="bean.endTime!=null">
+				#{bean.endTime},
+			</if>
+			<if test="bean.classRoom!=null">
+				#{bean.classRoom},
+			</if>
+			<if test="bean.teachMethod!=null">
+				#{bean.teachMethod},
+			</if>
+			<if test="bean.maxEnrollment!=null">
+				#{bean.maxEnrollment},
+			</if>
+			<if test="bean.assesMethod!=null">
+				#{bean.assesMethod},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入或者更新 (匹配有值的字段)-->
+	<insert id="insertOrUpdate" parameterType="com.scoremg.entity.po.CourseInfo">
+		INSERT INTO
+		course_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.courseId!=null">
+				course_id,
+			</if>
+			<if test="bean.courseName!=null">
+				course_name,
+			</if>
+			<if test="bean.teacherId!=null">
+				teacher_id,
+			</if>
+			<if test="bean.description!=null">
+				description,
+			</if>
+			<if test="bean.startTime!=null">
+				start_time,
+			</if>
+			<if test="bean.endTime!=null">
+				end_time,
+			</if>
+			<if test="bean.classRoom!=null">
+				class_room,
+			</if>
+			<if test="bean.teachMethod!=null">
+				teach_method,
+			</if>
+			<if test="bean.maxEnrollment!=null">
+				max_enrollment,
+			</if>
+			<if test="bean.assesMethod!=null">
+				asses_method,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.courseId!=null">
+				#{bean.courseId},
+			</if>
+			<if test="bean.courseName!=null">
+				#{bean.courseName},
+			</if>
+			<if test="bean.teacherId!=null">
+				#{bean.teacherId},
+			</if>
+			<if test="bean.description!=null">
+				#{bean.description},
+			</if>
+			<if test="bean.startTime!=null">
+				#{bean.startTime},
+			</if>
+			<if test="bean.endTime!=null">
+				#{bean.endTime},
+			</if>
+			<if test="bean.classRoom!=null">
+				#{bean.classRoom},
+			</if>
+			<if test="bean.teachMethod!=null">
+				#{bean.teachMethod},
+			</if>
+			<if test="bean.maxEnrollment!=null">
+				#{bean.maxEnrollment},
+			</if>
+			<if test="bean.assesMethod!=null">
+				#{bean.assesMethod},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix=" " suffix="" suffixOverrides=",">
+			<if test="bean.courseName!=null">
+				course_name =values(course_name),
+			</if>
+			<if test="bean.teacherId!=null">
+				teacher_id =values(teacher_id),
+			</if>
+			<if test="bean.description!=null">
+				description =values(description),
+			</if>
+			<if test="bean.startTime!=null">
+				start_time =values(start_time),
+			</if>
+			<if test="bean.endTime!=null">
+				end_time =values(end_time),
+			</if>
+			<if test="bean.classRoom!=null">
+				class_room =values(class_room),
+			</if>
+			<if test="bean.teachMethod!=null">
+				teach_method =values(teach_method),
+			</if>
+			<if test="bean.maxEnrollment!=null">
+				max_enrollment =values(max_enrollment),
+			</if>
+			<if test="bean.assesMethod!=null">
+				asses_method =values(asses_method),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加 (批量插入)-->
+	<insert id="insertBatch" parameterType="com.scoremg.entity.po.CourseInfo">
+		insert into course_info(course_name,teacher_id,description,start_time,end_time,class_room,teach_method,max_enrollment,asses_method) values
+		<foreach collection="list" item="item" separator=","  >
+			(#{item.courseName},#{item.teacherId},#{item.description},#{item.startTime},#{item.endTime},#{item.classRoom},#{item.teachMethod},#{item.maxEnrollment},#{item.assesMethod})
+		</foreach>
+	</insert>
+
+	<!--批量插入或者更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.scoremg.entity.po.CourseInfo">
+		insert into course_info(course_name,teacher_id,description,start_time,end_time,class_room,teach_method,max_enrollment,asses_method) values
+		<foreach collection="list" item="item" separator="," >
+			(#{item.courseName},#{item.teacherId},#{item.description},#{item.startTime},#{item.endTime},#{item.classRoom},#{item.teachMethod},#{item.maxEnrollment},#{item.assesMethod})
+		</foreach>
+		on DUPLICATE KEY update
+		course_id=values(course_id),course_name=values(course_name),teacher_id=values(teacher_id),description=values(description),start_time=values(start_time),end_time=values(end_time),class_room=values(class_room),teach_method=values(teach_method),max_enrollment=values(max_enrollment),asses_method=values(asses_method)
+	</insert>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		delete from course_info
+		<include refid="query_condition"/>
+	</delete>
+
+
+	<!--根据条件更新-->
+	<update id="updateByParam" parameterType="com.scoremg.entity.query.CourseInfoQuery">
+		UPDATE course_info
+		<set> 
+		<if test="bean.courseId !=null">
+			 course_id=#{bean.courseId},
+		</if>
+		<if test="bean.courseName !=null and bean.courseName!=''">
+			 course_name=#{bean.courseName},
+		</if>
+		<if test="bean.teacherId !=null and bean.teacherId!=''">
+			 teacher_id=#{bean.teacherId},
+		</if>
+		<if test="bean.description !=null and bean.description!=''">
+			 description=#{bean.description},
+		</if>
+		<if test="bean.startTime !=null">
+			 start_time=#{bean.startTime},
+		</if>
+		<if test="bean.endTime !=null">
+			 end_time=#{bean.endTime},
+		</if>
+		<if test="bean.classRoom !=null and bean.classRoom!=''">
+			 class_room=#{bean.classRoom},
+		</if>
+		<if test="bean.teachMethod !=null">
+			 teach_method=#{bean.teachMethod},
+		</if>
+		<if test="bean.maxEnrollment !=null">
+			 max_enrollment=#{bean.maxEnrollment},
+		</if>
+		<if test="bean.assesMethod !=null and bean.assesMethod!=''">
+			 asses_method=#{bean.assesMethod},
+		</if>
+		</set> 
+		<include refid="query_condition"/>
+	</update>
+
+
+	<!--根据CourseId查询-->
+	<select id="selectByCourseId" resultMap="base_result_map">
+		select <include refid="base_column_list"/>  from course_info where course_id=#{courseId}
+	</select>
+
+	<!--根据"CourseId更新-->
+	<update id="updateByCourseId" parameterType="com.scoremg.entity.po.CourseInfo">
+		update course_info
+		<set>
+			<if test="bean.courseId!=null">
+				course_id = #{bean.courseId},
+			</if>
+			<if test="bean.courseName!=null">
+				course_name = #{bean.courseName},
+			</if>
+			<if test="bean.teacherId!=null">
+				teacher_id = #{bean.teacherId},
+			</if>
+			<if test="bean.description!=null">
+				description = #{bean.description},
+			</if>
+			<if test="bean.startTime!=null">
+				start_time = #{bean.startTime},
+			</if>
+			<if test="bean.endTime!=null">
+				end_time = #{bean.endTime},
+			</if>
+			<if test="bean.classRoom!=null">
+				class_room = #{bean.classRoom},
+			</if>
+			<if test="bean.teachMethod!=null">
+				teach_method = #{bean.teachMethod},
+			</if>
+			<if test="bean.maxEnrollment!=null">
+				max_enrollment = #{bean.maxEnrollment},
+			</if>
+			<if test="bean.assesMethod!=null">
+				asses_method = #{bean.assesMethod},
+			</if>
+		</set>
+		where course_id=#{courseId}
+	</update>
+
+	<!--根据"CourseId删除-->
+	<delete id="deleteByCourseId">
+		delete from course_info where course_id=#{courseId}
+	</delete>
+</mapper>

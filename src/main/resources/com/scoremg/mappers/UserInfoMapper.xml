@@ -1,0 +1,674 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.scoremg.mappers.UserInfoMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.scoremg.entity.po.UserInfo">
+		<!--用户id-->
+		<id column="user_id" property="userId"/>
+		<!--用户名-->
+		<result column="username" property="username"/>
+		<!--密码-->
+		<result column="password" property="password"/>
+		<!--角色 0:学生 1：教师 2：管理员-->
+		<result column="role_type" property="roleType"/>
+		<!--姓名-->
+		<result column="name" property="name"/>
+		<!--邮箱-->
+		<result column="eamil" property="eamil"/>
+		<!--创建时间 1男 0女-->
+		<result column="create_time" property="createTime"/>
+		<!--性别1男 0女-->
+		<result column="sex" property="sex"/>
+		<!--别名-->
+		<result column="nick_name" property="nickName"/>
+		<!--电话-->
+		<result column="phone" property="phone"/>
+		<!--工作签名-->
+		<result column="signature" property="signature"/>
+		<!--学工号-->
+		<result column="stu_job_no" property="stuJobNo"/>
+	</resultMap>
+
+	<!--通用sql查询-->
+	<sql id="base_column_list">
+		user_id,username,password,role_type,name,eamil,create_time,sex,nick_name,phone,signature,stu_job_no
+	</sql>
+
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.userId !=null and query.userId!=''">
+			and user_id=#{query.userId}
+		</if>
+		<if test="query.username !=null and query.username!=''">
+			and username=#{query.username}
+		</if>
+		<if test="query.password !=null and query.password!=''">
+			and password=#{query.password}
+		</if>
+		<if test="query.roleType !=null">
+			and role_type=#{query.roleType}
+		</if>
+		<if test="query.name !=null and query.name!=''">
+			and name=#{query.name}
+		</if>
+		<if test="query.eamil !=null and query.eamil!=''">
+			and eamil=#{query.eamil}
+		</if>
+		<if test="query.createTime !=null">
+			and create_time=#{query.createTime}
+		</if>
+		<if test="query.sex !=null">
+			and sex=#{query.sex}
+		</if>
+		<if test="query.nickName !=null and query.nickName!=''">
+			and nick_name=#{query.nickName}
+		</if>
+		<if test="query.phone !=null and query.phone!=''">
+			and phone=#{query.phone}
+		</if>
+		<if test="query.signature !=null and query.signature!=''">
+			and signature=#{query.signature}
+		</if>
+		<if test="query.stuJobNo !=null and query.stuJobNo!=''">
+			and stu_job_no=#{query.stuJobNo}
+		</if>
+
+	</sql>
+
+	<!--扩展的查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.userIdFuzzy !=null and query.userIdFuzzy !=''">
+			 and user_id like concat('%',#{query.userIdFuzzy},'%')
+		</if>
+		<if test="query.usernameFuzzy !=null and query.usernameFuzzy !=''">
+			 and username like concat('%',#{query.usernameFuzzy},'%')
+		</if>
+		<if test="query.passwordFuzzy !=null and query.passwordFuzzy !=''">
+			 and password like concat('%',#{query.passwordFuzzy},'%')
+		</if>
+		<if test="query.nameFuzzy !=null and query.nameFuzzy !=''">
+			 and name like concat('%',#{query.nameFuzzy},'%')
+		</if>
+		<if test="query.eamilFuzzy !=null and query.eamilFuzzy !=''">
+			 and eamil like concat('%',#{query.eamilFuzzy},'%')
+		</if>
+		<if test="query.createTimeStart !=null and query.createTimeStart !=''">
+			<![CDATA[ and create_time>=str_to_date(#{query.createTimeStart},'%Y-%m-%d') ]]>
+		</if>
+		<if test="query.createTimeEnd !=null and query.createTimeEnd !=''">
+			<![CDATA[ and create_time < date_sub(str_to_date(#{query.createTimeEnd},'%Y-%m-%d'),interval-1 day) ]]>
+		</if>
+		<if test="query.nickNameFuzzy !=null and query.nickNameFuzzy !=''">
+			 and nick_name like concat('%',#{query.nickNameFuzzy},'%')
+		</if>
+		<if test="query.phoneFuzzy !=null and query.phoneFuzzy !=''">
+			 and phone like concat('%',#{query.phoneFuzzy},'%')
+		</if>
+		<if test="query.signatureFuzzy !=null and query.signatureFuzzy !=''">
+			 and signature like concat('%',#{query.signatureFuzzy},'%')
+		</if>
+		<if test="query.stuJobNoFuzzy !=null and query.stuJobNoFuzzy !=''">
+			 and stu_job_no like concat('%',#{query.stuJobNoFuzzy},'%')
+		</if>
+
+	</sql>
+
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM user_info
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+            order by ${query.orderBy}
+        </if>
+		<if test="query.simplePage!=null">
+            limit #{query.simplePage.start},#{query.simplePage.end}
+        </if>
+	</select>
+
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM user_info
+		<include refid="query_condition"/>
+	</select>
+
+	<!--插入 (匹配有值的字段)-->
+	<insert id="insert" parameterType="com.scoremg.entity.po.UserInfo">
+
+		INSERT INTO
+		user_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.userId!=null">
+				user_id,
+			</if>
+			<if test="bean.username!=null">
+				username,
+			</if>
+			<if test="bean.password!=null">
+				password,
+			</if>
+			<if test="bean.roleType!=null">
+				role_type,
+			</if>
+			<if test="bean.name!=null">
+				name,
+			</if>
+			<if test="bean.eamil!=null">
+				eamil,
+			</if>
+			<if test="bean.createTime!=null">
+				create_time,
+			</if>
+			<if test="bean.sex!=null">
+				sex,
+			</if>
+			<if test="bean.nickName!=null">
+				nick_name,
+			</if>
+			<if test="bean.phone!=null">
+				phone,
+			</if>
+			<if test="bean.signature!=null">
+				signature,
+			</if>
+			<if test="bean.stuJobNo!=null">
+				stu_job_no,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.userId!=null">
+				#{bean.userId},
+			</if>
+			<if test="bean.username!=null">
+				#{bean.username},
+			</if>
+			<if test="bean.password!=null">
+				#{bean.password},
+			</if>
+			<if test="bean.roleType!=null">
+				#{bean.roleType},
+			</if>
+			<if test="bean.name!=null">
+				#{bean.name},
+			</if>
+			<if test="bean.eamil!=null">
+				#{bean.eamil},
+			</if>
+			<if test="bean.createTime!=null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.sex!=null">
+				#{bean.sex},
+			</if>
+			<if test="bean.nickName!=null">
+				#{bean.nickName},
+			</if>
+			<if test="bean.phone!=null">
+				#{bean.phone},
+			</if>
+			<if test="bean.signature!=null">
+				#{bean.signature},
+			</if>
+			<if test="bean.stuJobNo!=null">
+				#{bean.stuJobNo},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入或者更新 (匹配有值的字段)-->
+	<insert id="insertOrUpdate" parameterType="com.scoremg.entity.po.UserInfo">
+		INSERT INTO
+		user_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.userId!=null">
+				user_id,
+			</if>
+			<if test="bean.username!=null">
+				username,
+			</if>
+			<if test="bean.password!=null">
+				password,
+			</if>
+			<if test="bean.roleType!=null">
+				role_type,
+			</if>
+			<if test="bean.name!=null">
+				name,
+			</if>
+			<if test="bean.eamil!=null">
+				eamil,
+			</if>
+			<if test="bean.createTime!=null">
+				create_time,
+			</if>
+			<if test="bean.sex!=null">
+				sex,
+			</if>
+			<if test="bean.nickName!=null">
+				nick_name,
+			</if>
+			<if test="bean.phone!=null">
+				phone,
+			</if>
+			<if test="bean.signature!=null">
+				signature,
+			</if>
+			<if test="bean.stuJobNo!=null">
+				stu_job_no,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.userId!=null">
+				#{bean.userId},
+			</if>
+			<if test="bean.username!=null">
+				#{bean.username},
+			</if>
+			<if test="bean.password!=null">
+				#{bean.password},
+			</if>
+			<if test="bean.roleType!=null">
+				#{bean.roleType},
+			</if>
+			<if test="bean.name!=null">
+				#{bean.name},
+			</if>
+			<if test="bean.eamil!=null">
+				#{bean.eamil},
+			</if>
+			<if test="bean.createTime!=null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.sex!=null">
+				#{bean.sex},
+			</if>
+			<if test="bean.nickName!=null">
+				#{bean.nickName},
+			</if>
+			<if test="bean.phone!=null">
+				#{bean.phone},
+			</if>
+			<if test="bean.signature!=null">
+				#{bean.signature},
+			</if>
+			<if test="bean.stuJobNo!=null">
+				#{bean.stuJobNo},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix=" " suffix="" suffixOverrides=",">
+			<if test="bean.password!=null">
+				password =values(password),
+			</if>
+			<if test="bean.roleType!=null">
+				role_type =values(role_type),
+			</if>
+			<if test="bean.name!=null">
+				name =values(name),
+			</if>
+			<if test="bean.createTime!=null">
+				create_time =values(create_time),
+			</if>
+			<if test="bean.sex!=null">
+				sex =values(sex),
+			</if>
+			<if test="bean.nickName!=null">
+				nick_name =values(nick_name),
+			</if>
+			<if test="bean.signature!=null">
+				signature =values(signature),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加 (批量插入)-->
+	<insert id="insertBatch" parameterType="com.scoremg.entity.po.UserInfo">
+		insert into user_info(user_id,username,password,role_type,name,eamil,create_time,sex,nick_name,phone,signature,stu_job_no) values
+		<foreach collection="list" item="item" separator=","  >
+			(#{item.userId},#{item.username},#{item.password},#{item.roleType},#{item.name},#{item.eamil},#{item.createTime},#{item.sex},#{item.nickName},#{item.phone},#{item.signature},#{item.stuJobNo})
+		</foreach>
+	</insert>
+
+	<!--批量插入或者更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.scoremg.entity.po.UserInfo">
+		insert into user_info(user_id,username,password,role_type,name,eamil,create_time,sex,nick_name,phone,signature,stu_job_no) values
+		<foreach collection="list" item="item" separator="," >
+			(#{item.userId},#{item.username},#{item.password},#{item.roleType},#{item.name},#{item.eamil},#{item.createTime},#{item.sex},#{item.nickName},#{item.phone},#{item.signature},#{item.stuJobNo})
+		</foreach>
+		on DUPLICATE KEY update
+		user_id=values(user_id),username=values(username),password=values(password),role_type=values(role_type),name=values(name),eamil=values(eamil),create_time=values(create_time),sex=values(sex),nick_name=values(nick_name),phone=values(phone),signature=values(signature),stu_job_no=values(stu_job_no)
+	</insert>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		delete from user_info
+		<include refid="query_condition"/>
+	</delete>
+
+
+	<!--根据条件更新-->
+	<update id="updateByParam" parameterType="com.scoremg.entity.query.UserInfoQuery">
+		UPDATE user_info
+		<set> 
+		<if test="bean.userId !=null and bean.userId!=''">
+			 user_id=#{bean.userId},
+		</if>
+		<if test="bean.username !=null and bean.username!=''">
+			 username=#{bean.username},
+		</if>
+		<if test="bean.password !=null and bean.password!=''">
+			 password=#{bean.password},
+		</if>
+		<if test="bean.roleType !=null">
+			 role_type=#{bean.roleType},
+		</if>
+		<if test="bean.name !=null and bean.name!=''">
+			 name=#{bean.name},
+		</if>
+		<if test="bean.eamil !=null and bean.eamil!=''">
+			 eamil=#{bean.eamil},
+		</if>
+		<if test="bean.createTime !=null">
+			 create_time=#{bean.createTime},
+		</if>
+		<if test="bean.sex !=null">
+			 sex=#{bean.sex},
+		</if>
+		<if test="bean.nickName !=null and bean.nickName!=''">
+			 nick_name=#{bean.nickName},
+		</if>
+		<if test="bean.phone !=null and bean.phone!=''">
+			 phone=#{bean.phone},
+		</if>
+		<if test="bean.signature !=null and bean.signature!=''">
+			 signature=#{bean.signature},
+		</if>
+		<if test="bean.stuJobNo !=null and bean.stuJobNo!=''">
+			 stu_job_no=#{bean.stuJobNo},
+		</if>
+		</set> 
+		<include refid="query_condition"/>
+	</update>
+
+
+	<!--根据UserId查询-->
+	<select id="selectByUserId" resultMap="base_result_map">
+		select <include refid="base_column_list"/>  from user_info where user_id=#{userId}
+	</select>
+
+	<!--根据"UserId更新-->
+	<update id="updateByUserId" parameterType="com.scoremg.entity.po.UserInfo">
+		update user_info
+		<set>
+			<if test="bean.userId!=null">
+				user_id = #{bean.userId},
+			</if>
+			<if test="bean.username!=null">
+				username = #{bean.username},
+			</if>
+			<if test="bean.password!=null">
+				password = #{bean.password},
+			</if>
+			<if test="bean.roleType!=null">
+				role_type = #{bean.roleType},
+			</if>
+			<if test="bean.name!=null">
+				name = #{bean.name},
+			</if>
+			<if test="bean.eamil!=null">
+				eamil = #{bean.eamil},
+			</if>
+			<if test="bean.createTime!=null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.sex!=null">
+				sex = #{bean.sex},
+			</if>
+			<if test="bean.nickName!=null">
+				nick_name = #{bean.nickName},
+			</if>
+			<if test="bean.phone!=null">
+				phone = #{bean.phone},
+			</if>
+			<if test="bean.signature!=null">
+				signature = #{bean.signature},
+			</if>
+			<if test="bean.stuJobNo!=null">
+				stu_job_no = #{bean.stuJobNo},
+			</if>
+		</set>
+		where user_id=#{userId}
+	</update>
+
+	<!--根据"UserId删除-->
+	<delete id="deleteByUserId">
+		delete from user_info where user_id=#{userId}
+	</delete>
+
+	<!--根据Eamil查询-->
+	<select id="selectByEamil" resultMap="base_result_map">
+		select <include refid="base_column_list"/>  from user_info where eamil=#{eamil}
+	</select>
+
+	<!--根据"Eamil更新-->
+	<update id="updateByEamil" parameterType="com.scoremg.entity.po.UserInfo">
+		update user_info
+		<set>
+			<if test="bean.userId!=null">
+				user_id = #{bean.userId},
+			</if>
+			<if test="bean.username!=null">
+				username = #{bean.username},
+			</if>
+			<if test="bean.password!=null">
+				password = #{bean.password},
+			</if>
+			<if test="bean.roleType!=null">
+				role_type = #{bean.roleType},
+			</if>
+			<if test="bean.name!=null">
+				name = #{bean.name},
+			</if>
+			<if test="bean.eamil!=null">
+				eamil = #{bean.eamil},
+			</if>
+			<if test="bean.createTime!=null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.sex!=null">
+				sex = #{bean.sex},
+			</if>
+			<if test="bean.nickName!=null">
+				nick_name = #{bean.nickName},
+			</if>
+			<if test="bean.phone!=null">
+				phone = #{bean.phone},
+			</if>
+			<if test="bean.signature!=null">
+				signature = #{bean.signature},
+			</if>
+			<if test="bean.stuJobNo!=null">
+				stu_job_no = #{bean.stuJobNo},
+			</if>
+		</set>
+		where eamil=#{eamil}
+	</update>
+
+	<!--根据"Eamil删除-->
+	<delete id="deleteByEamil">
+		delete from user_info where eamil=#{eamil}
+	</delete>
+
+	<!--根据StuJobNo查询-->
+	<select id="selectByStuJobNo" resultMap="base_result_map">
+		select <include refid="base_column_list"/>  from user_info where stu_job_no=#{stuJobNo}
+	</select>
+
+	<!--根据"StuJobNo更新-->
+	<update id="updateByStuJobNo" parameterType="com.scoremg.entity.po.UserInfo">
+		update user_info
+		<set>
+			<if test="bean.userId!=null">
+				user_id = #{bean.userId},
+			</if>
+			<if test="bean.username!=null">
+				username = #{bean.username},
+			</if>
+			<if test="bean.password!=null">
+				password = #{bean.password},
+			</if>
+			<if test="bean.roleType!=null">
+				role_type = #{bean.roleType},
+			</if>
+			<if test="bean.name!=null">
+				name = #{bean.name},
+			</if>
+			<if test="bean.eamil!=null">
+				eamil = #{bean.eamil},
+			</if>
+			<if test="bean.createTime!=null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.sex!=null">
+				sex = #{bean.sex},
+			</if>
+			<if test="bean.nickName!=null">
+				nick_name = #{bean.nickName},
+			</if>
+			<if test="bean.phone!=null">
+				phone = #{bean.phone},
+			</if>
+			<if test="bean.signature!=null">
+				signature = #{bean.signature},
+			</if>
+			<if test="bean.stuJobNo!=null">
+				stu_job_no = #{bean.stuJobNo},
+			</if>
+		</set>
+		where stu_job_no=#{stuJobNo}
+	</update>
+
+	<!--根据"StuJobNo删除-->
+	<delete id="deleteByStuJobNo">
+		delete from user_info where stu_job_no=#{stuJobNo}
+	</delete>
+
+	<!--根据Username查询-->
+	<select id="selectByUsername" resultMap="base_result_map">
+		select <include refid="base_column_list"/>  from user_info where username=#{username}
+	</select>
+
+	<!--根据"Username更新-->
+	<update id="updateByUsername" parameterType="com.scoremg.entity.po.UserInfo">
+		update user_info
+		<set>
+			<if test="bean.userId!=null">
+				user_id = #{bean.userId},
+			</if>
+			<if test="bean.username!=null">
+				username = #{bean.username},
+			</if>
+			<if test="bean.password!=null">
+				password = #{bean.password},
+			</if>
+			<if test="bean.roleType!=null">
+				role_type = #{bean.roleType},
+			</if>
+			<if test="bean.name!=null">
+				name = #{bean.name},
+			</if>
+			<if test="bean.eamil!=null">
+				eamil = #{bean.eamil},
+			</if>
+			<if test="bean.createTime!=null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.sex!=null">
+				sex = #{bean.sex},
+			</if>
+			<if test="bean.nickName!=null">
+				nick_name = #{bean.nickName},
+			</if>
+			<if test="bean.phone!=null">
+				phone = #{bean.phone},
+			</if>
+			<if test="bean.signature!=null">
+				signature = #{bean.signature},
+			</if>
+			<if test="bean.stuJobNo!=null">
+				stu_job_no = #{bean.stuJobNo},
+			</if>
+		</set>
+		where username=#{username}
+	</update>
+
+	<!--根据"Username删除-->
+	<delete id="deleteByUsername">
+		delete from user_info where username=#{username}
+	</delete>
+
+	<!--根据Phone查询-->
+	<select id="selectByPhone" resultMap="base_result_map">
+		select <include refid="base_column_list"/>  from user_info where phone=#{phone}
+	</select>
+
+	<!--根据"Phone更新-->
+	<update id="updateByPhone" parameterType="com.scoremg.entity.po.UserInfo">
+		update user_info
+		<set>
+			<if test="bean.userId!=null">
+				user_id = #{bean.userId},
+			</if>
+			<if test="bean.username!=null">
+				username = #{bean.username},
+			</if>
+			<if test="bean.password!=null">
+				password = #{bean.password},
+			</if>
+			<if test="bean.roleType!=null">
+				role_type = #{bean.roleType},
+			</if>
+			<if test="bean.name!=null">
+				name = #{bean.name},
+			</if>
+			<if test="bean.eamil!=null">
+				eamil = #{bean.eamil},
+			</if>
+			<if test="bean.createTime!=null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.sex!=null">
+				sex = #{bean.sex},
+			</if>
+			<if test="bean.nickName!=null">
+				nick_name = #{bean.nickName},
+			</if>
+			<if test="bean.phone!=null">
+				phone = #{bean.phone},
+			</if>
+			<if test="bean.signature!=null">
+				signature = #{bean.signature},
+			</if>
+			<if test="bean.stuJobNo!=null">
+				stu_job_no = #{bean.stuJobNo},
+			</if>
+		</set>
+		where phone=#{phone}
+	</update>
+
+	<!--根据"Phone删除-->
+	<delete id="deleteByPhone">
+		delete from user_info where phone=#{phone}
+	</delete>
+</mapper>

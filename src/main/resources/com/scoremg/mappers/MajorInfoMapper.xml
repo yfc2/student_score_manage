@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.scoremg.mappers.MajorInfoMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.scoremg.entity.po.MajorInfo">
+		<!--id-->
+		<id column="id" property="id"/>
+		<!--部门ID-->
+		<result column="department_id" property="departmentId"/>
+		<!--专业名称-->
+		<result column="major_name" property="majorName"/>
+		<!--专业名称-->
+		<result column="description" property="description"/>
+	</resultMap>
+
+	<!--通用sql查询-->
+	<sql id="base_column_list">
+		id,department_id,major_name,description
+	</sql>
+
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.id !=null">
+			and id=#{query.id}
+		</if>
+		<if test="query.departmentId !=null">
+			and department_id=#{query.departmentId}
+		</if>
+		<if test="query.majorName !=null and query.majorName!=''">
+			and major_name=#{query.majorName}
+		</if>
+		<if test="query.description !=null and query.description!=''">
+			and description=#{query.description}
+		</if>
+
+	</sql>
+
+	<!--扩展的查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.majorNameFuzzy !=null and query.majorNameFuzzy !=''">
+			 and major_name like concat('%',#{query.majorNameFuzzy},'%')
+		</if>
+		<if test="query.descriptionFuzzy !=null and query.descriptionFuzzy !=''">
+			 and description like concat('%',#{query.descriptionFuzzy},'%')
+		</if>
+
+	</sql>
+
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM major_info
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+            order by ${query.orderBy}
+        </if>
+		<if test="query.simplePage!=null">
+            limit #{query.simplePage.start},#{query.simplePage.end}
+        </if>
+	</select>
+
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM major_info
+		<include refid="query_condition"/>
+	</select>
+
+	<!--插入 (匹配有值的字段)-->
+	<insert id="insert" parameterType="com.scoremg.entity.po.MajorInfo">
+		<selectKey keyProperty="bean.id" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID()
+        </selectKey>
+		INSERT INTO
+		major_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				id,
+			</if>
+			<if test="bean.departmentId!=null">
+				department_id,
+			</if>
+			<if test="bean.majorName!=null">
+				major_name,
+			</if>
+			<if test="bean.description!=null">
+				description,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				#{bean.id},
+			</if>
+			<if test="bean.departmentId!=null">
+				#{bean.departmentId},
+			</if>
+			<if test="bean.majorName!=null">
+				#{bean.majorName},
+			</if>
+			<if test="bean.description!=null">
+				#{bean.description},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入或者更新 (匹配有值的字段)-->
+	<insert id="insertOrUpdate" parameterType="com.scoremg.entity.po.MajorInfo">
+		INSERT INTO
+		major_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				id,
+			</if>
+			<if test="bean.departmentId!=null">
+				department_id,
+			</if>
+			<if test="bean.majorName!=null">
+				major_name,
+			</if>
+			<if test="bean.description!=null">
+				description,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				#{bean.id},
+			</if>
+			<if test="bean.departmentId!=null">
+				#{bean.departmentId},
+			</if>
+			<if test="bean.majorName!=null">
+				#{bean.majorName},
+			</if>
+			<if test="bean.description!=null">
+				#{bean.description},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix=" " suffix="" suffixOverrides=",">
+			<if test="bean.departmentId!=null">
+				department_id =values(department_id),
+			</if>
+			<if test="bean.majorName!=null">
+				major_name =values(major_name),
+			</if>
+			<if test="bean.description!=null">
+				description =values(description),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加 (批量插入)-->
+	<insert id="insertBatch" parameterType="com.scoremg.entity.po.MajorInfo">
+		insert into major_info(department_id,major_name,description) values
+		<foreach collection="list" item="item" separator=","  >
+			(#{item.departmentId},#{item.majorName},#{item.description})
+		</foreach>
+	</insert>
+
+	<!--批量插入或者更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.scoremg.entity.po.MajorInfo">
+		insert into major_info(department_id,major_name,description) values
+		<foreach collection="list" item="item" separator="," >
+			(#{item.departmentId},#{item.majorName},#{item.description})
+		</foreach>
+		on DUPLICATE KEY update
+		id=values(id),department_id=values(department_id),major_name=values(major_name),description=values(description)
+	</insert>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		delete from major_info
+		<include refid="query_condition"/>
+	</delete>
+
+
+	<!--根据条件更新-->
+	<update id="updateByParam" parameterType="com.scoremg.entity.query.MajorInfoQuery">
+		UPDATE major_info
+		<set> 
+		<if test="bean.id !=null">
+			 id=#{bean.id},
+		</if>
+		<if test="bean.departmentId !=null">
+			 department_id=#{bean.departmentId},
+		</if>
+		<if test="bean.majorName !=null and bean.majorName!=''">
+			 major_name=#{bean.majorName},
+		</if>
+		<if test="bean.description !=null and bean.description!=''">
+			 description=#{bean.description},
+		</if>
+		</set> 
+		<include refid="query_condition"/>
+	</update>
+
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		select <include refid="base_column_list"/>  from major_info where id=#{id}
+	</select>
+
+	<!--根据"Id更新-->
+	<update id="updateById" parameterType="com.scoremg.entity.po.MajorInfo">
+		update major_info
+		<set>
+			<if test="bean.id!=null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.departmentId!=null">
+				department_id = #{bean.departmentId},
+			</if>
+			<if test="bean.majorName!=null">
+				major_name = #{bean.majorName},
+			</if>
+			<if test="bean.description!=null">
+				description = #{bean.description},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据"Id删除-->
+	<delete id="deleteById">
+		delete from major_info where id=#{id}
+	</delete>
+</mapper>

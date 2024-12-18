@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.scoremg.mappers.NoteInfoMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.scoremg.entity.po.NoteInfo">
+		<!--id-->
+		<id column="id" property="id"/>
+		<!--课程id-->
+		<result column="course_id" property="courseId"/>
+		<!--标题-->
+		<result column="title" property="title"/>
+		<!--内容-->
+		<result column="content" property="content"/>
+		<!--发布人-->
+		<result column="post_by" property="postBy"/>
+		<!--发布时间-->
+		<result column="post_time" property="postTime"/>
+		<!--0: 教师 1：管理员-->
+		<result column="type" property="type"/>
+	</resultMap>
+
+	<!--通用sql查询-->
+	<sql id="base_column_list">
+		id,course_id,title,content,post_by,post_time,type
+	</sql>
+
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.id !=null">
+			and id=#{query.id}
+		</if>
+		<if test="query.courseId !=null">
+			and course_id=#{query.courseId}
+		</if>
+		<if test="query.title !=null and query.title!=''">
+			and title=#{query.title}
+		</if>
+		<if test="query.content !=null and query.content!=''">
+			and content=#{query.content}
+		</if>
+		<if test="query.postBy !=null and query.postBy!=''">
+			and post_by=#{query.postBy}
+		</if>
+		<if test="query.postTime !=null">
+			and post_time=#{query.postTime}
+		</if>
+		<if test="query.type !=null">
+			and type=#{query.type}
+		</if>
+
+	</sql>
+
+	<!--扩展的查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.titleFuzzy !=null and query.titleFuzzy !=''">
+			 and title like concat('%',#{query.titleFuzzy},'%')
+		</if>
+		<if test="query.contentFuzzy !=null and query.contentFuzzy !=''">
+			 and content like concat('%',#{query.contentFuzzy},'%')
+		</if>
+		<if test="query.postByFuzzy !=null and query.postByFuzzy !=''">
+			 and post_by like concat('%',#{query.postByFuzzy},'%')
+		</if>
+		<if test="query.postTimeStart !=null and query.postTimeStart !=''">
+			<![CDATA[ and post_time>=str_to_date(#{query.postTimeStart},'%Y-%m-%d') ]]>
+		</if>
+		<if test="query.postTimeEnd !=null and query.postTimeEnd !=''">
+			<![CDATA[ and post_time < date_sub(str_to_date(#{query.postTimeEnd},'%Y-%m-%d'),interval-1 day) ]]>
+		</if>
+
+	</sql>
+
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM note_info
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+            order by ${query.orderBy}
+        </if>
+		<if test="query.simplePage!=null">
+            limit #{query.simplePage.start},#{query.simplePage.end}
+        </if>
+	</select>
+
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM note_info
+		<include refid="query_condition"/>
+	</select>
+
+	<!--插入 (匹配有值的字段)-->
+	<insert id="insert" parameterType="com.scoremg.entity.po.NoteInfo">
+		<selectKey keyProperty="bean.id" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID()
+        </selectKey>
+		INSERT INTO
+		note_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				id,
+			</if>
+			<if test="bean.courseId!=null">
+				course_id,
+			</if>
+			<if test="bean.title!=null">
+				title,
+			</if>
+			<if test="bean.content!=null">
+				content,
+			</if>
+			<if test="bean.postBy!=null">
+				post_by,
+			</if>
+			<if test="bean.postTime!=null">
+				post_time,
+			</if>
+			<if test="bean.type!=null">
+				type,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				#{bean.id},
+			</if>
+			<if test="bean.courseId!=null">
+				#{bean.courseId},
+			</if>
+			<if test="bean.title!=null">
+				#{bean.title},
+			</if>
+			<if test="bean.content!=null">
+				#{bean.content},
+			</if>
+			<if test="bean.postBy!=null">
+				#{bean.postBy},
+			</if>
+			<if test="bean.postTime!=null">
+				#{bean.postTime},
+			</if>
+			<if test="bean.type!=null">
+				#{bean.type},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入或者更新 (匹配有值的字段)-->
+	<insert id="insertOrUpdate" parameterType="com.scoremg.entity.po.NoteInfo">
+		INSERT INTO
+		note_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				id,
+			</if>
+			<if test="bean.courseId!=null">
+				course_id,
+			</if>
+			<if test="bean.title!=null">
+				title,
+			</if>
+			<if test="bean.content!=null">
+				content,
+			</if>
+			<if test="bean.postBy!=null">
+				post_by,
+			</if>
+			<if test="bean.postTime!=null">
+				post_time,
+			</if>
+			<if test="bean.type!=null">
+				type,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id!=null">
+				#{bean.id},
+			</if>
+			<if test="bean.courseId!=null">
+				#{bean.courseId},
+			</if>
+			<if test="bean.title!=null">
+				#{bean.title},
+			</if>
+			<if test="bean.content!=null">
+				#{bean.content},
+			</if>
+			<if test="bean.postBy!=null">
+				#{bean.postBy},
+			</if>
+			<if test="bean.postTime!=null">
+				#{bean.postTime},
+			</if>
+			<if test="bean.type!=null">
+				#{bean.type},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix=" " suffix="" suffixOverrides=",">
+			<if test="bean.courseId!=null">
+				course_id =values(course_id),
+			</if>
+			<if test="bean.title!=null">
+				title =values(title),
+			</if>
+			<if test="bean.content!=null">
+				content =values(content),
+			</if>
+			<if test="bean.postBy!=null">
+				post_by =values(post_by),
+			</if>
+			<if test="bean.postTime!=null">
+				post_time =values(post_time),
+			</if>
+			<if test="bean.type!=null">
+				type =values(type),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加 (批量插入)-->
+	<insert id="insertBatch" parameterType="com.scoremg.entity.po.NoteInfo">
+		insert into note_info(course_id,title,content,post_by,post_time,type) values
+		<foreach collection="list" item="item" separator=","  >
+			(#{item.courseId},#{item.title},#{item.content},#{item.postBy},#{item.postTime},#{item.type})
+		</foreach>
+	</insert>
+
+	<!--批量插入或者更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.scoremg.entity.po.NoteInfo">
+		insert into note_info(course_id,title,content,post_by,post_time,type) values
+		<foreach collection="list" item="item" separator="," >
+			(#{item.courseId},#{item.title},#{item.content},#{item.postBy},#{item.postTime},#{item.type})
+		</foreach>
+		on DUPLICATE KEY update
+		id=values(id),course_id=values(course_id),title=values(title),content=values(content),post_by=values(post_by),post_time=values(post_time),type=values(type)
+	</insert>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		delete from note_info
+		<include refid="query_condition"/>
+	</delete>
+
+
+	<!--根据条件更新-->
+	<update id="updateByParam" parameterType="com.scoremg.entity.query.NoteInfoQuery">
+		UPDATE note_info
+		<set> 
+		<if test="bean.id !=null">
+			 id=#{bean.id},
+		</if>
+		<if test="bean.courseId !=null">
+			 course_id=#{bean.courseId},
+		</if>
+		<if test="bean.title !=null and bean.title!=''">
+			 title=#{bean.title},
+		</if>
+		<if test="bean.content !=null and bean.content!=''">
+			 content=#{bean.content},
+		</if>
+		<if test="bean.postBy !=null and bean.postBy!=''">
+			 post_by=#{bean.postBy},
+		</if>
+		<if test="bean.postTime !=null">
+			 post_time=#{bean.postTime},
+		</if>
+		<if test="bean.type !=null">
+			 type=#{bean.type},
+		</if>
+		</set> 
+		<include refid="query_condition"/>
+	</update>
+
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		select <include refid="base_column_list"/>  from note_info where id=#{id}
+	</select>
+
+	<!--根据"Id更新-->
+	<update id="updateById" parameterType="com.scoremg.entity.po.NoteInfo">
+		update note_info
+		<set>
+			<if test="bean.id!=null">
+				id = #{bean.id},
+			</if>
+			<if test="bean.courseId!=null">
+				course_id = #{bean.courseId},
+			</if>
+			<if test="bean.title!=null">
+				title = #{bean.title},
+			</if>
+			<if test="bean.content!=null">
+				content = #{bean.content},
+			</if>
+			<if test="bean.postBy!=null">
+				post_by = #{bean.postBy},
+			</if>
+			<if test="bean.postTime!=null">
+				post_time = #{bean.postTime},
+			</if>
+			<if test="bean.type!=null">
+				type = #{bean.type},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据"Id删除-->
+	<delete id="deleteById">
+		delete from note_info where id=#{id}
+	</delete>
+</mapper>

@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.scoremg.mappers.DepartmentInfoMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.scoremg.entity.po.DepartmentInfo">
+		<!--部门id-->
+		<id column="department_id" property="departmentId"/>
+		<!--部门名称-->
+		<result column="department_name" property="departmentName"/>
+		<!--部门描述-->
+		<result column="description" property="description"/>
+	</resultMap>
+
+	<!--通用sql查询-->
+	<sql id="base_column_list">
+		department_id,department_name,description
+	</sql>
+
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.departmentId !=null">
+			and department_id=#{query.departmentId}
+		</if>
+		<if test="query.departmentName !=null and query.departmentName!=''">
+			and department_name=#{query.departmentName}
+		</if>
+		<if test="query.description !=null and query.description!=''">
+			and description=#{query.description}
+		</if>
+
+	</sql>
+
+	<!--扩展的查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.departmentNameFuzzy !=null and query.departmentNameFuzzy !=''">
+			 and department_name like concat('%',#{query.departmentNameFuzzy},'%')
+		</if>
+		<if test="query.descriptionFuzzy !=null and query.descriptionFuzzy !=''">
+			 and description like concat('%',#{query.descriptionFuzzy},'%')
+		</if>
+
+	</sql>
+
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM department_info
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+            order by ${query.orderBy}
+        </if>
+		<if test="query.simplePage!=null">
+            limit #{query.simplePage.start},#{query.simplePage.end}
+        </if>
+	</select>
+
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM department_info
+		<include refid="query_condition"/>
+	</select>
+
+	<!--插入 (匹配有值的字段)-->
+	<insert id="insert" parameterType="com.scoremg.entity.po.DepartmentInfo">
+		<selectKey keyProperty="bean.departmentId" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID()
+        </selectKey>
+		INSERT INTO
+		department_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.departmentId!=null">
+				department_id,
+			</if>
+			<if test="bean.departmentName!=null">
+				department_name,
+			</if>
+			<if test="bean.description!=null">
+				description,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.departmentId!=null">
+				#{bean.departmentId},
+			</if>
+			<if test="bean.departmentName!=null">
+				#{bean.departmentName},
+			</if>
+			<if test="bean.description!=null">
+				#{bean.description},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入或者更新 (匹配有值的字段)-->
+	<insert id="insertOrUpdate" parameterType="com.scoremg.entity.po.DepartmentInfo">
+		INSERT INTO
+		department_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.departmentId!=null">
+				department_id,
+			</if>
+			<if test="bean.departmentName!=null">
+				department_name,
+			</if>
+			<if test="bean.description!=null">
+				description,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.departmentId!=null">
+				#{bean.departmentId},
+			</if>
+			<if test="bean.departmentName!=null">
+				#{bean.departmentName},
+			</if>
+			<if test="bean.description!=null">
+				#{bean.description},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix=" " suffix="" suffixOverrides=",">
+			<if test="bean.description!=null">
+				description =values(description),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加 (批量插入)-->
+	<insert id="insertBatch" parameterType="com.scoremg.entity.po.DepartmentInfo">
+		insert into department_info(department_name,description) values
+		<foreach collection="list" item="item" separator=","  >
+			(#{item.departmentName},#{item.description})
+		</foreach>
+	</insert>
+
+	<!--批量插入或者更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.scoremg.entity.po.DepartmentInfo">
+		insert into department_info(department_name,description) values
+		<foreach collection="list" item="item" separator="," >
+			(#{item.departmentName},#{item.description})
+		</foreach>
+		on DUPLICATE KEY update
+		department_id=values(department_id),department_name=values(department_name),description=values(description)
+	</insert>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		delete from department_info
+		<include refid="query_condition"/>
+	</delete>
+
+
+	<!--根据条件更新-->
+	<update id="updateByParam" parameterType="com.scoremg.entity.query.DepartmentInfoQuery">
+		UPDATE department_info
+		<set> 
+		<if test="bean.departmentId !=null">
+			 department_id=#{bean.departmentId},
+		</if>
+		<if test="bean.departmentName !=null and bean.departmentName!=''">
+			 department_name=#{bean.departmentName},
+		</if>
+		<if test="bean.description !=null and bean.description!=''">
+			 description=#{bean.description},
+		</if>
+		</set> 
+		<include refid="query_condition"/>
+	</update>
+
+
+	<!--根据DepartmentId查询-->
+	<select id="selectByDepartmentId" resultMap="base_result_map">
+		select <include refid="base_column_list"/>  from department_info where department_id=#{departmentId}
+	</select>
+
+	<!--根据"DepartmentId更新-->
+	<update id="updateByDepartmentId" parameterType="com.scoremg.entity.po.DepartmentInfo">
+		update department_info
+		<set>
+			<if test="bean.departmentId!=null">
+				department_id = #{bean.departmentId},
+			</if>
+			<if test="bean.departmentName!=null">
+				department_name = #{bean.departmentName},
+			</if>
+			<if test="bean.description!=null">
+				description = #{bean.description},
+			</if>
+		</set>
+		where department_id=#{departmentId}
+	</update>
+
+	<!--根据"DepartmentId删除-->
+	<delete id="deleteByDepartmentId">
+		delete from department_info where department_id=#{departmentId}
+	</delete>
+
+	<!--根据DepartmentName查询-->
+	<select id="selectByDepartmentName" resultMap="base_result_map">
+		select <include refid="base_column_list"/>  from department_info where department_name=#{departmentName}
+	</select>
+
+	<!--根据"DepartmentName更新-->
+	<update id="updateByDepartmentName" parameterType="com.scoremg.entity.po.DepartmentInfo">
+		update department_info
+		<set>
+			<if test="bean.departmentId!=null">
+				department_id = #{bean.departmentId},
+			</if>
+			<if test="bean.departmentName!=null">
+				department_name = #{bean.departmentName},
+			</if>
+			<if test="bean.description!=null">
+				description = #{bean.description},
+			</if>
+		</set>
+		where department_name=#{departmentName}
+	</update>
+
+	<!--根据"DepartmentName删除-->
+	<delete id="deleteByDepartmentName">
+		delete from department_info where department_name=#{departmentName}
+	</delete>
+</mapper>

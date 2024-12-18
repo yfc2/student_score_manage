@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.scoremg.mappers.ClassInfoMapper">
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.scoremg.entity.po.ClassInfo">
+		<!--班级Id-->
+		<id column="class_id" property="classId"/>
+		<!--专业id-->
+		<result column="major_id" property="majorId"/>
+		<!--班级名称-->
+		<result column="class_name" property="className"/>
+	</resultMap>
+
+	<!--通用sql查询-->
+	<sql id="base_column_list">
+		class_id,major_id,class_name
+	</sql>
+
+	<!--基础查询条件-->
+	<sql id="base_query_condition">
+		<if test="query.classId !=null">
+			and class_id=#{query.classId}
+		</if>
+		<if test="query.majorId !=null">
+			and major_id=#{query.majorId}
+		</if>
+		<if test="query.className !=null and query.className!=''">
+			and class_name=#{query.className}
+		</if>
+
+	</sql>
+
+	<!--扩展的查询条件-->
+	<sql id="base_query_condition_extend">
+		<if test="query.classNameFuzzy !=null and query.classNameFuzzy !=''">
+			 and class_name like concat('%',#{query.classNameFuzzy},'%')
+		</if>
+
+	</sql>
+
+	<!--通用查询条件-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_query_condition"/>
+			<include refid="base_query_condition_extend"/>
+		</where>
+	</sql>
+
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT
+		<include refid="base_column_list"/>
+		FROM class_info
+		<include refid="query_condition"/>
+		<if test="query.orderBy!=null">
+            order by ${query.orderBy}
+        </if>
+		<if test="query.simplePage!=null">
+            limit #{query.simplePage.start},#{query.simplePage.end}
+        </if>
+	</select>
+
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM class_info
+		<include refid="query_condition"/>
+	</select>
+
+	<!--插入 (匹配有值的字段)-->
+	<insert id="insert" parameterType="com.scoremg.entity.po.ClassInfo">
+		<selectKey keyProperty="bean.classId" resultType="Integer" order="AFTER">
+            select LAST_INSERT_ID()
+        </selectKey>
+		INSERT INTO
+		class_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.classId!=null">
+				class_id,
+			</if>
+			<if test="bean.majorId!=null">
+				major_id,
+			</if>
+			<if test="bean.className!=null">
+				class_name,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.classId!=null">
+				#{bean.classId},
+			</if>
+			<if test="bean.majorId!=null">
+				#{bean.majorId},
+			</if>
+			<if test="bean.className!=null">
+				#{bean.className},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入或者更新 (匹配有值的字段)-->
+	<insert id="insertOrUpdate" parameterType="com.scoremg.entity.po.ClassInfo">
+		INSERT INTO
+		class_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.classId!=null">
+				class_id,
+			</if>
+			<if test="bean.majorId!=null">
+				major_id,
+			</if>
+			<if test="bean.className!=null">
+				class_name,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.classId!=null">
+				#{bean.classId},
+			</if>
+			<if test="bean.majorId!=null">
+				#{bean.majorId},
+			</if>
+			<if test="bean.className!=null">
+				#{bean.className},
+			</if>
+		</trim>
+		on DUPLICATE key update
+		<trim prefix=" " suffix="" suffixOverrides=",">
+			<if test="bean.majorId!=null">
+				major_id =values(major_id),
+			</if>
+			<if test="bean.className!=null">
+				class_name =values(class_name),
+			</if>
+		</trim>
+	</insert>
+
+	<!--添加 (批量插入)-->
+	<insert id="insertBatch" parameterType="com.scoremg.entity.po.ClassInfo">
+		insert into class_info(major_id,class_name) values
+		<foreach collection="list" item="item" separator=","  >
+			(#{item.majorId},#{item.className})
+		</foreach>
+	</insert>
+
+	<!--批量插入或者更新-->
+	<insert id="insertOrUpdateBatch" parameterType="com.scoremg.entity.po.ClassInfo">
+		insert into class_info(major_id,class_name) values
+		<foreach collection="list" item="item" separator="," >
+			(#{item.majorId},#{item.className})
+		</foreach>
+		on DUPLICATE KEY update
+		class_id=values(class_id),major_id=values(major_id),class_name=values(class_name)
+	</insert>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		delete from class_info
+		<include refid="query_condition"/>
+	</delete>
+
+
+	<!--根据条件更新-->
+	<update id="updateByParam" parameterType="com.scoremg.entity.query.ClassInfoQuery">
+		UPDATE class_info
+		<set> 
+		<if test="bean.classId !=null">
+			 class_id=#{bean.classId},
+		</if>
+		<if test="bean.majorId !=null">
+			 major_id=#{bean.majorId},
+		</if>
+		<if test="bean.className !=null and bean.className!=''">
+			 class_name=#{bean.className},
+		</if>
+		</set> 
+		<include refid="query_condition"/>
+	</update>
+
+
+	<!--根据ClassId查询-->
+	<select id="selectByClassId" resultMap="base_result_map">
+		select <include refid="base_column_list"/>  from class_info where class_id=#{classId}
+	</select>
+
+	<!--根据"ClassId更新-->
+	<update id="updateByClassId" parameterType="com.scoremg.entity.po.ClassInfo">
+		update class_info
+		<set>
+			<if test="bean.classId!=null">
+				class_id = #{bean.classId},
+			</if>
+			<if test="bean.majorId!=null">
+				major_id = #{bean.majorId},
+			</if>
+			<if test="bean.className!=null">
+				class_name = #{bean.className},
+			</if>
+		</set>
+		where class_id=#{classId}
+	</update>
+
+	<!--根据"ClassId删除-->
+	<delete id="deleteByClassId">
+		delete from class_info where class_id=#{classId}
+	</delete>
+</mapper>
