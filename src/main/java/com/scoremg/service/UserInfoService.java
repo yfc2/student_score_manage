@@ -3,11 +3,15 @@ package com.scoremg.service;
 
 import java.util.List;
 
+import com.scoremg.entity.dto.WebSessionUserDto;
 import com.scoremg.entity.po.UserInfo;
 
 import com.scoremg.entity.query.UserInfoQuery;
 
 import com.scoremg.entity.vo.PaginationResultVO;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 /**
  * @Description:service
@@ -126,4 +130,11 @@ public interface UserInfoService{
 	 */
 	Integer deleteUserInfoByPhone(String phone);
 
+	/**
+	 * 等可以
+	 * @param account
+	 * @param password
+	 * @return
+	 */
+    WebSessionUserDto login(@NotEmpty String account, @NotEmpty String password, @NotNull Integer roleType);
 }

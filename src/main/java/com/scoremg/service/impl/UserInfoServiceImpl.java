@@ -3,14 +3,20 @@ package com.scoremg.service.impl;
 
 import java.util.List;
 
+import com.scoremg.entity.contants.Constants;
+import com.scoremg.entity.dto.WebSessionUserDto;
+import com.scoremg.entity.enums.ResponseCodeEnum;
+import com.scoremg.entity.enums.RoleTypeEnums;
 import com.scoremg.entity.po.UserInfo;
 
 import com.scoremg.entity.query.UserInfoQuery;
 
 import com.scoremg.entity.vo.PaginationResultVO;
 
+import com.scoremg.exception.BusinessException;
 import com.scoremg.service.UserInfoService;
 
+import com.scoremg.util.StringTools;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -188,5 +194,48 @@ public class UserInfoServiceImpl implements UserInfoService{
 	 */
 	public Integer deleteUserInfoByPhone(String phone) { 
 		return this.userInfoMapper.deleteByPhone(phone);
+	}
+
+
+	/**
+	 * 登录
+	 * @param account 账号信息
+	 * @param password 密码
+	 * @return WebSessionUserDto
+	 */
+	@Override
+	public WebSessionUserDto login(String account, String password,Integer roleType) {
+
+		// 如果登陆的角色类型错误
+		RoleTypeEnums typeEnums = RoleTypeEnums.getByType(roleType);
+
+		if (typeEnums == null) {
+			throw new BusinessException(ResponseCodeEnum.CODE_600);
+		}
+
+		UserInfo userInfo = userInfoMapper.selectByUsername(account);
+		if (userInfo == null) {
+			userInfo=userInfoMapper.selectByStuJobNo(account);
+		}
+		if (userInfo==null){
+			throw new BusinessException(Constants.LOGIN_ERROR_ACCOUNT_UNEXIST);
+		}
+
+		// 1.校验密码
+		if (!StringTools.encodeByMD5(password).equalsIgnoreCase(userInfo.getPassword())) {
+			throw new BusinessException(Constants.LOGIN_ERROR_PASS_ERROR);
+		}
+
+		//2. 校验角色登录类型
+		if (!userInfo.getRoleType().equals(roleType)){
+			throw new BusinessException(Constants.LOGIN_ERROR_PASS_ERROR);
+		}
+
+		WebSessionUserDto sessionUserDto = new WebSessionUserDto();
+		sessionUserDto.setUserId(userInfo.getUserId());
+		sessionUserDto.setRoleType(userInfo.getRoleType());
+		sessionUserDto.setUserName(userInfo.getUsername());
+
+		return sessionUserDto;
 	}
 }
